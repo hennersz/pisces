@@ -75,7 +75,7 @@ def useEGD():
     random = EGDWrapper(egd).getRandomBytes
     return 1
 
-if sys.platform == "linux2":
+if sys.platform in ["linux2","darwin"]:
     class DevRandom:
 	def __init__(self):
 	    self.dev = None
