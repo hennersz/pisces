@@ -56,11 +56,14 @@ class AlgorithmIdentifier(asn1.ASN1Object):
         self.oid, self.params = obj
 
     def __cmp__(self, other):
-	if isinstance(other, AlgorithmIdentifier):
-	    return cmp((self.oid, self.params), (other.oid, other.params)) 
-	elif isinstance(other, asn1.Sequence):
-	    return cmp([self.oid, self.params], other.val)
-	return -1
+		if isinstance(other, AlgorithmIdentifier):
+			return cmp((self.oid, self.params), (other.oid, other.params)) 
+		elif isinstance(other, asn1.Sequence):
+			return cmp([self.oid, self.params], other.val)
+		elif isinstance(other, list):
+			# Because python passes by assignment, the val is taken on comparison. Therefore we check for list (as returned by calling .val).
+			return cmp([self.oid, self.params], other)
+		return -1
         
     def __repr__(self):
         if self.params:
@@ -69,12 +72,12 @@ class AlgorithmIdentifier(asn1.ASN1Object):
             return "<" + (self.name or repr(self.oid)) + ">"
 
     def _encode(self, io):
-	contents = [self.oid.encode()]
-	if self.params:
-	    contents.append(self.params.encode())
-	else:
-	    contents.append(asn1.unparseNull())
-        io.write(asn1.unparseSequence(contents))
+        contents = [self.oid.encode()]
+        if self.params:
+        	contents.append(self.params.encode())
+        else:
+        	contents.append(asn1.unparseNull())
+        	io.write(asn1.unparseSequence(contents))
 
 def test():
     global x, buf, y

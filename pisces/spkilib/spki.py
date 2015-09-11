@@ -54,7 +54,7 @@ import types
 from UserList import UserList
 
 from Crypto.PublicKey import RSA
-from Crypto.Util.number import str2long, long2str
+from Crypto.Util.number import bytes_to_long, long_to_bytes
 
 from pisces import asn1
 from pisces.spkilib import sexp
@@ -263,9 +263,9 @@ class RSAPublicKey(RSAKey):
 	for obj in self.args:
             # XXX don't think the for loop is necessary
 	    if obj.name == 'e':
-		e = str2long(obj.args[0])
+		e = bytes_to_long(obj.args[0])
 	    elif obj.name == 'n':
-		n = str2long(obj.args[0])
+		n = bytes_to_long(obj.args[0])
 	    else:
 		raise ValueError, "unknown part: %s" % `obj`
 	# order of args defined by RSA impl
@@ -273,8 +273,8 @@ class RSAPublicKey(RSAKey):
 
     def _impl_to_sexp(self):
 	e, n = self.impl.getPublicComponents()
-	e_enc = object('e', [shorten(long2str(e))])
-	n_enc = object('n', [shorten(long2str(n), 1)])
+	e_enc = object('e', [shorten(long_to_bytes(e))])
+	n_enc = object('n', [shorten(long_to_bytes(n), 1)])
 	self.args = e_enc, n_enc
 
     def verify(self, obj, sig, princ):
@@ -317,8 +317,8 @@ class RSAPrivateKey(RSAKey):
 	return Signature(hash, princ, value)
 
     def _impl_to_sexp(self):
-	e, n = map(long2str, self.impl.getPublicComponents())
-	d, p, q = map(long2str, self.impl.getPrivateComponents())
+	e, n = map(long_to_bytes, self.impl.getPublicComponents())
+	d, p, q = map(long_to_bytes, self.impl.getPrivateComponents())
 	
         self.args = (object('e', (shorten(e), )),
                      object('n', (shorten(n, 1), )),
@@ -331,15 +331,15 @@ class RSAPrivateKey(RSAKey):
         # XXX don't think the for loop is necessary
         for obj in self.args:
             if obj.name == 'e':
-                e = str2long(obj.args[0])
+                e = bytes_to_long(obj.args[0])
             elif obj.name == 'n':
-                n = str2long(obj.args[0])
+                n = bytes_to_long(obj.args[0])
             elif obj.name == 'd':
-                d = str2long(obj.args[0])
+                d = bytes_to_long(obj.args[0])
             elif obj.name == 'p':
-                p = str2long(obj.args[0])
+                p = bytes_to_long(obj.args[0])
             elif obj.name == 'q':
-                q = str2long(obj.args[0])
+                q = bytes_to_long(obj.args[0])
             else:
                 raise ValueError, "unknown part: %s" % `obj`
         self.impl = pkcs1.RSA_pkcs1((n, e, d, p, q))

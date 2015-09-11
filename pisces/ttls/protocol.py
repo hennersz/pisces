@@ -67,7 +67,7 @@ from pisces.spkilib.sexp import parse, object_to_sexp
 from pisces import cryptrand, hmac
 from Crypto.Hash import MD5, SHA
 from Crypto.Cipher import DES3
-from Crypto.Util.number import long2str, str2long
+from Crypto.Util.number import long_to_bytes, bytes_to_long
 
 import string
 import time
@@ -399,7 +399,7 @@ class Session:
 	return Data(shrunk, mac)
 
     def makeMAC(self, secret, seqno, buf):
-	seqstr = long2str(seqno)
+	seqstr = long_to_bytes(seqno)
 	buf = seqstr + buf
 	mac = self.hmac(secret, [buf])[0]
 ## 	print "HMAC(%s, %s) = %s" % (repr(secret), repr(buf),

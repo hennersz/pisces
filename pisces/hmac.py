@@ -28,13 +28,13 @@ class HMAC:
             the hashing algorithm to use.  In essence it must provide the
             following interface:
 
-            hashmodule.digestsize
+            hashmodule.digest_size
                 The length of the hash's output in bytes
 
             hashmodule.new(key)
                 Function which returns a new instance of a hash object,
                 initialized to key.  The returned object must have a digest()
-                method that returns a string of size hashmodule.digestsize,
+                method that returns a string of size hashmodule.digest_size,
                 and an update() method that accepts strings to add to the
                 digest.
 
@@ -65,7 +65,7 @@ class HMAC:
         # if it is longer than B, it should be hashed and the resulting L
         # bytes will be used as the key
         #
-        L = self.hashmodule.digestsize
+        L = self.hashmodule.digest_size
         B = 64                                    # can't get from module
         keylen = len(key)
         if keylen > B:
@@ -102,7 +102,7 @@ class HMACSpecializer:
 
     def __init__(self, hashmodule, key):
         self.hashmodule = hashmodule
-        L = self.hashmodule.digestsize
+        L = self.hashmodule.digest_size
         # XXX what is B?
         B = 64                                    # can't get from module
         keylen = len(key)
@@ -127,7 +127,7 @@ class HMACSpecializer:
 
 def test():
     from types import StringType
-    from Crypto.Util.number import longtobytes, bytestolong
+    from Crypto.Util.number import long_to_bytes, bytes_to_long
 
     # Test data taken from RFC 2104
     testdata = [
@@ -147,25 +147,25 @@ def test():
     from Crypto.Hash import MD5
     for key, data, digest in testdata:
         if type(key) <> StringType:
-            key = longtobytes(key)
+            key = long_to_bytes(key)
         if type(data) <> StringType:
-            data = longtobytes(data)
+            data = long_to_bytes(data)
 
         h = HMAC(MD5)
         d = h.hash(key, data)
-        d = bytestolong(d)
+        d = bytes_to_long(d)
         assert d == digest, "pisces.hmac: HMAC digest failed"
 
     # now check the specializer the same way
     for key, data, digest in testdata:
         if type(key) <> StringType:
-            key = longtobytes(key)
+            key = long_to_bytes(key)
         if type(data) <> StringType:
-            data = longtobytes(data)
+            data = long_to_bytes(data)
 
         h = HMACSpecializer(MD5, key)
         d = h.hash(data)
-        d = bytestolong(d)
+        d = bytes_to_long(d)
         assert d == digest, "pisces.hmac: HMACSpecializer digest failed"
 
 if __name__ == '__main__':

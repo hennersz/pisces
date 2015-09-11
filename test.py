@@ -92,24 +92,31 @@ def test_spkilib():
         assert sx1 == sx3, "pisces.spkilib: parseText failed"
 
 # The following modules all define test functions
-modules = ('pisces.algid', 'pisces.hmac', 'pisces.pkcs1', 'pisces.utils')
+modules = ('pisces.algid', 'pisces.hmac', 'pisces.utils', 'pisces.pkcs1')
+#modules = ('pisces.algid', 'pisces.hmac', 'pisces.utils') # TODO: PKCSL needs some work
 
 def test_modules1():
     """Test standard modules that have internal test functions defined"""
     for name in modules:
+    	print "MODULES1: Testing " + name
         mod = loadModule(name)
         test = getattr(mod, 'test')
         test()
+        print "MODULES1: Done test on " + name
 
 def test_modules2():
     """Test modules using test cases in this script"""
+    print "\n\nMODULES2: Testing PWCrypt"
     test_pwcrypt()
+    print "MODULES2: Testing SPKILib"
     test_spkilib()
 
 def main():
     test_modules1()
+    print "MODULE 1 TESTS COMPLETE"
     test_modules2()
-    print "all tests okay"
+    print "MODULE 2 TESTS COMPLETE"
+    print "\n\nALL TESTS COMPLETE"
 
 if __name__ == "__main__":
     main()

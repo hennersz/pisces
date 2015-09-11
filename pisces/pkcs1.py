@@ -23,7 +23,7 @@ from types import TupleType
 
 from Crypto.PublicKey import RSA
 from Crypto.Hash import MD2, MD5
-from Crypto.Util.number import str2long, long2str
+from Crypto.Util.number import bytes_to_long, long_to_bytes
 
 from pisces import asn1, algid, cryptrand
 
@@ -46,6 +46,9 @@ class DigestInfo(asn1.ASN1Object):
 	contents = [self.digestAlgorithm.encode(),
 		    asn1.unparseOctetString(self.digest)]
         io.write(asn1.unparseSequence(contents))
+    
+    def __cmp__(self, other):
+    	return cmp([self.digestAlgorithm.oid, self.digestAlgorithm.params], other[0].val)
 
 def countBits(l):
     """Count the number of bits in the (long) integer l"""
@@ -81,16 +84,16 @@ class RSA_pkcs1:
             raise ValueError, \
                   "plaintext too long, max length=%d" % self.max_datalen
         block = self.__makeEncryptionBlock(self.__PUBLIC, plain)
-        num = str2long(block)
-        cipherNum = self.key._encrypt(num)[0]
-        return long2str(cipherNum)
+        num = bytes_to_long(block)
+        cipherNum = self.key._encrypt(num, None)[0] # None parameter is ignored (hopefully)
+        return long_to_bytes(cipherNum)
 
     def decryptPublic(self, cipher):
-        num = str2long(cipher)
+        num = bytes_to_long(cipher)
         if num >= self.key.n:
             raise ValueError, "cipher text too long"
-        plainNum = self.key._encrypt(num)[0]
-        block = long2str(plainNum)
+        plainNum = self.key._encrypt(num, None)[0] # None parameter is ignored (hopefully)
+        block = long_to_bytes(plainNum)
         return self.__parseEncryptionBlock(self.__PRIVATE, block)
 
     def encryptPrivate(self, plain):
@@ -98,20 +101,20 @@ class RSA_pkcs1:
             raise ValueError, \
                   "plaintext too long, max length=%d" % self.max_datalen
         block = self.__makeEncryptionBlock(self.__PRIVATE, plain)
-        num = str2long(block)
+        num = bytes_to_long(block)
         cipherNum = self.key._decrypt((num,))
-        return long2str(cipherNum)
+        return long_to_bytes(cipherNum)
 
     def decryptPrivate(self, cipher):
-        num = str2long(cipher)
+        num = bytes_to_long(cipher)
         if num >= self.key.n:
             raise ValueError, "cipher text too long"
         plainNum = self.key._decrypt((num,))
-        block = long2str(plainNum)
+        block = long_to_bytes(plainNum)
         return self.__parseEncryptionBlock(self.__PUBLIC, block)
 
     def __parseEncryptionBlock(self, blocktype, block):
-        # leading \000 stripped by str2long/long2str conversion
+        # leading \000 stripped by bytes_to_long/long_to_bytes conversion
         if block[0] != chr(blocktype):
             raise ValueError, "bad blocktype %s" % ord(block[0])
         block = block[1:]
@@ -195,16 +198,21 @@ class signatureLookup:
 getSignatureImpl = signatureLookup()
 
 def test():
-    _key = RSA.generate(512, cryptrand.random)
+    print "\t-------------"
+    print "\tTesting PKCS1"    
+    print "\t-------------"
+    _key = RSA.generate(1024, cryptrand.random)
     key = RSA_pkcs1(_key)
     
     plain = 'i am un chien andalusia'
+    print "\tTesting (encrypt-public/decrypt)... " + plain
     cipher = key.encryptPublic(plain)
     decip = key.decryptPrivate(cipher)
     assert plain == decip, \
            "pisces.pkcs1: Encrypt public/decrypt private failed"
 
     plain = 'this monkey\'s gone to heaven'
+    print "\tTesting (encrypt-private/decrypt)... " + plain
     cipher = key.encryptPrivate(plain)
     decip = key.decryptPublic(cipher)
     assert plain == decip, \
@@ -212,17 +220,22 @@ def test():
 
     # test asn.1 support for DigestInfo
     global x, buf, y
+    print "\tTesting ASN.1 Support for DigestInfo encode/decode"
     x = DigestInfo(algid.AlgorithmIdentifier([algid.oid_md5, None]),
 		   'x' * 16)
     buf = x.encode()
     y = asn1.parse(buf)
     assert x == y, "pisces.pkcs1: DigestInfo encode/decode failed"
-
+    
+    print "\tTesting PKCS1 Signature Verification"
     signer = MD5withRSA(key)
     verifier = MD5withRSA(key)
     sig = signer.sign('foo')
     assert verifier.verify('foo', sig) == 1, \
 	   "pisces.pkcs1: Signature verification failed"
+    print "\n\n\t------------------"
+    print "\tEND OF PKCS1 TESTS"    
+    print "\t------------------"
 
 if __name__ == "__main__":
     test()

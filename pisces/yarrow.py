@@ -36,7 +36,7 @@ except ImportError:
 
 # should probably be able to use mxCrypto too
 from Crypto.Cipher import DES3
-from Crypto.Util.number import str2long, long2str
+from Crypto.Util.number import bytes_to_long, long_to_bytes
 
 class EntropySource:
     """Track the amout of entropy from a single source
@@ -223,7 +223,7 @@ class Yarrow:
 
     def _cipher(self):
         self.counter = self.counter + 1
-        counter = pad64(long2str(self.counter))
+        counter = pad64(long_to_bytes(self.counter))
         return self.cipher.encrypt(counter)
 
     def getOutput(self, num):
@@ -295,7 +295,7 @@ class Yarrow:
         zap(self.key)
 	self.key = hash_ex(hash(v_i + self.key), self.KEY_SIZE)
 	self.cipher = DES3.new(self.key, DES3.ECB)
-	self.counter = str2long(self.cipher.encrypt('\000' * 8))
+	self.counter = bytes_to_long(self.cipher.encrypt('\000' * 8))
 
     def slowIntoFast(self):
         """Feed hash of slow pool into fast pool, then reseed"""

@@ -67,7 +67,7 @@ class KeyDerivationFactory:
 
         # computed how many blocks of prf output we need
         self.l, self.r = divmod(self.keylen,
-                                self.hash.digestsize)
+                                self.hash.digest_size)
         if self.r != 0:
             # always round up
             self.l = self.l + 1
