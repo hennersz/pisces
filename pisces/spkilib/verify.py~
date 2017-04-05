@@ -94,7 +94,8 @@ class Verifier:
         if not cert.isValid():
             print "cert is invalid"
             return None
-        if not (not delegate or cert.propagate):
+        if not (cert.subject.isName() \
+                or (not delegate or cert.propagate)):
             print "bad name or delegate"
             return None
         chain = self.verify(issuer, perm & cert.tag, 1)

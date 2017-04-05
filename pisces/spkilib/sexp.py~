@@ -117,7 +117,7 @@ def parseText(t):
         raise ParseError('<na>', '<na>', t)
     if type(sexp) == StringType:
 	raise ParseError('(', t[0], t)
-    convertDisplay(sexp) # side-effect!
+    # convertDisplay(sexp) # side-effect!
     return SExp(repr=sexp)
 
 def convertDisplay(t):
