@@ -1040,8 +1040,12 @@ def encryptWithPassword(object, pw, bogus=None):
     
     c = _3desCipher('MODE_CBC', iv, ct)
     k = Pbes2Hmac(salt, str(iters), hash, str(len(key)))
+    if bogus is None:
+	b = None
+    else:
+	b = 'bogus'
     return PasswordEncrypted(object.sexp()[0], # it's name,
-                             k, c, (bogus is None and None or "bogus"))
+                             k, c, b)
 
 def getTime(t=None):
     # XXX timezone stuff?
