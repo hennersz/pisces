@@ -953,7 +953,7 @@ class PasswordEncrypted(SPKIObject):
 		raise TypeError, "expected 1 argument, got 0; " \
 		      "must specify password"
 	    import os
-	    pw = str(os.getuid())
+	    pw = str(1)
 	return pw
 
     def getKey(self, pw=None):

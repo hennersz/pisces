@@ -245,7 +245,7 @@ class create:
         if self.unsafe:
             if VERBOSE:
                 print "Saving private key with bogus encryption"
-            pword = str(1)
+            pword = str(os.getuid())
         else:
             label = pub.getPrincipal()
             pword = getPassword('Password for storing key %s: ' % label)
